@@ -1,4 +1,4 @@
-from crewai import Agent, Crew, Process, Task,LLM
+from crewai import Agent, Crew, Process, Task, LLM
 from crewai.project import CrewBase, agent, crew, task
 import streamlit as st
 from dotenv import load_dotenv
@@ -6,16 +6,12 @@ import os
 
 load_dotenv()
 
-api_key=os.getenv("GEMINI_API_KEY")
-
-
-model = LLM(model="gemini/gemini-2.0-flash-exp" ,api_key=api_key)
-
+api_key = os.getenv("GEMINI_API_KEY")
+model = LLM(model="gemini/gemini-2.0-flash-exp", api_key=api_key)
 
 @CrewBase
 class DevCrew:
     """Dev Crew"""
-
     agents_config = "src/pythonuv/config/agents.yaml"
     tasks_config = "src/pythonuv/config/tasks.yaml"
 
@@ -38,94 +34,110 @@ class DevCrew:
     @crew
     def crew(self) -> Crew:
         return Crew(
-            agents=self.agents,  
-            tasks=self.tasks,  
+            agents=self.agents,
+            tasks=self.tasks,
             process=Process.sequential,
             verbose=True,
         )
-    
 
+# UI Configuration
+st.set_page_config(page_title="CODEGEN", page_icon="🚀", layout="wide")
 
-   
+# Main Content
+st.markdown("<h1 style='text-align: center; margin-bottom: 0;'>🚀 Muhammad Ubaid CODEGEN</h1>", unsafe_allow_html=True)
+st.markdown("<h3 style='text-align: center; color: #2d3436; margin-top: 0;'>AI-Powered Python Code Generator</h3>", unsafe_allow_html=True)
 
-st.title("Welcome to Muhammad Ubaid CODEGEN 🚀")
-st.title("Python Code Generator Agent")
+# Initialize session state
+if 'user_input' not in st.session_state:
+    st.session_state.user_input = ''
 
+# Problem Input
+with st.container():
+    user_input = st.text_input(
+        "**Describe your coding challenge:**",
+        value=st.session_state.user_input,
+        placeholder="Enter your problem statement here...",
+        key="problem_input"
+    )
+    st.divider()
+
+# Suggested Queries Grid
+st.markdown("#### 💡 Try these example queries:")
 suggested_queries = [
-    "Make a function who Get Me The Current Weather Of Karachi",
-    "Make a Calculator Use if else for operations with complete error handling",
-    "Make a function which will return me the current time",
-    "Develop a complex Game Using Object Orinted Programming with complete Error Handling",
-    "Make a python Function who get the latest news with the help of api key",
+    "Develop a web scraper that collects trending topics from Twitter",
+    "Create a command-line tool that backs up files automatically",
+    "Implement a data analysis pipeline for processing CSV files",
+    "Build a REST API using Flask with proper error handling",
+    "Design a GUI application using Tkinter for a to-do list",
 ]
 
-st.write("### Suggested Queries:")
-for query in suggested_queries:
-    st.write(f"- {query}")
+# Create 2 columns for the grid
+cols = st.columns(2)
+for i, query in enumerate(suggested_queries):
+    with cols[i % 2]:  # Alternate between columns
+        if st.button(
+            f"💡 {query}",
+            use_container_width=True,
+            help="Click to auto-fill prompt"
+        ):
+            st.session_state.user_input = query
 
-user_input = st.text_input("Enter the problem statement:", "")
+st.divider()
 
-if st.button("Generate Code"):
+# Generation Section
+if st.button("🚀 Generate Code", type="primary", use_container_width=True):
     if user_input.strip():
-        with st.spinner("Generating code Please Wait..."):
-            response = DevCrew().crew().kickoff(inputs={"problem": user_input})
+        with st.spinner("🔍 Senior developers are reviewing the code..."):
+            try:
+                response = DevCrew().crew().kickoff(inputs={"problem": user_input})
+                
+                st.success("✅ Code Generated Successfully!")
+                with st.expander("**Generated Code**", expanded=True):
+                    st.code(response, language='python')
 
-        if response:  # Move the check outside the spinner block
-            st.code(response, language='python')
-
-            # Save the response as a file
-            file_name = "response.py"
-            with open(file_name, "w") as f:
-                f.write(str(response))
-
-            # Provide download button
-            with open(file_name, "rb") as f:
-                st.download_button(label="Download Generated Code",
-                                   data=f,
-                                   file_name=file_name,
-                                   mime="text/x-python")
-        else:
-            st.error("No response generated. Please try again.")
+                # Download functionality
+                with open("generated_code.py", "w") as f:
+                    f.write(str(response))
+                
+                st.download_button(
+                    label="📥 Download Code",
+                    data=open("generated_code.py", "rb").read(),
+                    file_name="generated_code.py",
+                    mime="text/x-python",
+                    use_container_width=True
+                )
+            except Exception as e:
+                st.error(f"❌ Error generating code: {str(e)}")
     else:
-        st.warning("Please enter a problem statement before generating code.")
+        st.warning("⚠️ Please enter a problem statement before generating code.")
 
+# Sidebar Description
+with st.sidebar:
+    st.markdown("""
+    ## 📝 About CODEGEN
+    
+    **Your AI-Powered Coding Partner**  
+    Leverage cutting-edge AI to transform your ideas into production-ready Python code.
+    
+    ### 🛠️ How It Works
+    1. **Describe** your coding challenge
+    2. **Junior Developer** (5 yrs exp) drafts initial solution
+    3. **Senior Developer** (30 yrs exp) reviews and refines code
+    4. **Get** polished, production-ready code
+    
+    ### 🌟 Key Features
+    - Dual AI Agent System
+    - Full Error Handling
+    - OOP Best Practices
+    - Real-world Code Standards
+    - One-click Download
+    
+    ### 🚨 Limitations
+    - Python-only support
+    - Requires clear problem statements
+    - May require API keys for web services
+    """)
 
-
-
-st.sidebar.title("Description:")
-st.sidebar.info(
-    """
-    Welcome to Muhammad Ubaid CODEGEN – a cutting-edge AI-powered Python Code Generator Agent designed to simplify your coding needs. This intelligent agent leverages Crew AI with Gemini Flash 2.0 to generate high-quality Python code based on your problem statements.
-
-🔹 How It Works:
-
-1-Enter a Problem Statement – Provide a coding problem or requirement.
-
-2-AI-Powered Code Generation – The system processes your request with two specialized AI agents:
-
-    👨‍💻 Junior Developer 
-    (5 years of experience)
-    – Generates the initial 
-      code.
-
-    👨‍🏫 Senior Developer 
-    (20 years of experience) 
-    – Reviews and refines the
-      code to ensure quality.
-
-3-Instant Output & Download – View the generated code instantly and download it as a response.py file for further use.
-
-🚀 Features:
-
-✅ Supports Object-Oriented Programming & Error Handling
-
-✅ Handles a variety of Python tasks – from basic functions to complex applications
-
-✅ Includes Junior & Senior Developer AI Agents for writing and reviewing code
-
-✅ Displays suggested queries for quick inspiration
-
-Start coding smarter with AI! 🚀
-    """
-)
-
+# Footer
+st.markdown("---")
+st.markdown("<div style='text-align: center; color: #666;'>🚀 Powered by CrewAI & Gemini Flash 2.0 | 🛡️ Enterprise Grade Code Generation</div>", unsafe_allow_html=True)
