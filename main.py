@@ -7,7 +7,7 @@ import os
 load_dotenv()
 
 api_key = os.getenv("GEMINI_API_KEY")
-model = LLM(model="gemini/gemini-1.5-flash", api_key=api_key)
+model = LLM(model="gemini/gemini-2.0-flash-exp" ,api_key=api_key)
 
 @CrewBase
 class DevCrew:
