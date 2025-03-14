@@ -41,7 +41,7 @@ class DevCrew:
         )
 
 # UI Configuration
-st.set_page_config(page_title="CODEGEN", page_icon="🚀", layout="wide")
+st.set_page_config(page_title="CODEGEN", page_icon="💻", layout="wide")
 
 # Main Content
 st.markdown("<h1 style='text-align: center; margin-bottom: 0;'>🚀 Muhammad Ubaid CODEGEN</h1>", unsafe_allow_html=True)
